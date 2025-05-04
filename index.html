@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Send Location</title>
+  </head>
+  <body>
+    <h1>Send Your Location</h1>
+    <form action="/locate" method="POST">
+      <label for="latitude">Latitude:</label>
+      <input type="text" id="latitude" name="latitude" required />
+      <br />
+      <label for="longitude">Longitude:</label>
+      <input type="text" id="longitude" name="longitude" required />
+      <br />
+      <textarea name="address" rows="4" cols="50" placeholder="Your location"></textarea>
+      <button type="submit">Send Location</button>
+    </form>
+    <script>
+      function getCurrentPositionPromise() {
+        return new Promise((resolve, reject) => {
+          if (!navigator.geolocation) {
+            reject(new Error("Geolocation is not supported by your browser"));
+          } else {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          }
+        });
+      }
+      const getCurrentAddress = async (lat, lon) => {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          console.log(data);
+          document.querySelector('textarea').value = data.display_name;
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      getCurrentPositionPromise()
+        .then((position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          document.getElementById("latitude").value = latitude;
+          document.getElementById("longitude").value = longitude;
+          getCurrentAddress(latitude, longitude);
+        })
+        .catch((error) => {
+          console.error("Error getting geolocation:", error);
+        });
+    </script>
+  </body>
+</html>
